@@ -17,6 +17,11 @@ export default function Home() {
     await PDFGenerator.generateATS('cv-container');
   };
 
+  const handleDownloadJobApplication = async () => {
+    const jobTitle = prompt("Enter target job title (optional):");
+    await PDFGenerator.generateJobApplication('cv-container', jobTitle || undefined);
+  };
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* PDF Download Buttons */}
@@ -38,6 +43,12 @@ export default function Home() {
           className="download-btn bg-purple-600 hover:bg-purple-700"
         >
           ATS PDF
+        </button>
+        <button 
+          onClick={handleDownloadJobApplication}
+          className="download-btn bg-orange-600 hover:bg-orange-700"
+        >
+          Job Application PDF
         </button>
       </div>
       

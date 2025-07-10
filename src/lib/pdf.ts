@@ -142,7 +142,7 @@ export class PDFGenerator {
     
     try {
       await this.generateFromElement('cv-ats-temp', {
-        filename: 'Piotr_Dankowiakowski_CV_ATS.pdf',
+        filename: 'Piotr_Dankowiakowski_CV_ATS_Optimized.pdf',
         quality: 1.0
       });
     } finally {
@@ -152,30 +152,147 @@ export class PDFGenerator {
   }
 
   /**
+   * Generate keyword-optimized PDF specifically for job applications
+   */
+  static async generateJobApplication(elementId: string, jobTitle?: string): Promise<void> {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      throw new Error(`Element with ID '${elementId}' not found`);
+    }
+
+    // Clone element for job-specific optimization
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.id = 'cv-job-temp';
+    
+    // Apply job-specific ATS optimizations
+    this.optimizeForATS(clone);
+    this.addJobSpecificOptimizations(clone, jobTitle);
+    
+    // Temporarily add to DOM
+    document.body.appendChild(clone);
+    
+    try {
+      const filename = jobTitle 
+        ? `Piotr_Dankowiakowski_CV_${jobTitle.replace(/\s+/g, '_')}.pdf`
+        : 'Piotr_Dankowiakowski_CV_Job_Application.pdf';
+        
+      await this.generateFromElement('cv-job-temp', {
+        filename,
+        quality: 1.0
+      });
+    } finally {
+      // Clean up
+      document.body.removeChild(clone);
+    }
+  }
+
+  /**
+   * Apply job-specific optimizations
+   */
+  private static addJobSpecificOptimizations(element: HTMLElement, jobTitle?: string): void {
+    if (!jobTitle) return;
+
+    // Add job title context to summary if relevant
+    const summary = element.querySelector('section p');
+    if (summary && jobTitle) {
+      const currentText = summary.textContent || '';
+      if (!currentText.toLowerCase().includes(jobTitle.toLowerCase())) {
+        summary.innerHTML = `${currentText} Seeking ${jobTitle} opportunities to leverage expertise in 3D animation, AI development, and educational technology.`;
+      }
+    }
+
+    // Add metadata for ATS parsing
+    const metaData = document.createElement('div');
+    metaData.style.display = 'none';
+    metaData.innerHTML = `
+      <!-- ATS Metadata -->
+      <span>Target Position: ${jobTitle}</span>
+      <span>Keywords: 3D Artist, AI Specialist, Blender, Educational Technology, Machine Learning</span>
+      <span>Location: Warsaw, Poland</span>
+      <span>Experience: 6+ years</span>
+    `;
+    element.appendChild(metaData);
+  }
+
+  /**
    * Apply ATS-specific optimizations to element
    */
   private static optimizeForATS(element: HTMLElement): void {
-    // Remove all images except the profile photo
+    // Remove all images except the profile photo for maximum ATS compatibility
     const images = element.querySelectorAll('img');
     images.forEach((img, index) => {
       if (index > 0) { // Keep only the first image (profile photo)
         img.remove();
+      } else {
+        // Optimize the profile photo for ATS
+        img.style.width = '100px';
+        img.style.height = '100px';
+        img.style.border = '1px solid black';
+        img.style.borderRadius = '0';
       }
     });
 
-    // Simplify colors to black/white
+    // Enhanced ATS color optimization
     const allElements = element.querySelectorAll('*');
     allElements.forEach(el => {
       const htmlEl = el as HTMLElement;
       htmlEl.style.color = 'black';
-      htmlEl.style.backgroundColor = 'transparent';
+      htmlEl.style.backgroundColor = 'white';
       htmlEl.style.borderColor = 'black';
+      htmlEl.style.textDecoration = 'none';
+      
+      // Remove gradients and complex styling
+      htmlEl.style.background = 'transparent';
+      htmlEl.style.boxShadow = 'none';
+      htmlEl.style.borderRadius = '0';
     });
 
-    // Remove complex styling
-    element.style.fontFamily = 'Arial, sans-serif';
+    // ATS-optimized typography
+    element.style.fontFamily = 'Arial, Helvetica, sans-serif';
     element.style.fontSize = '11pt';
     element.style.lineHeight = '1.4';
+    element.style.margin = '0';
+    element.style.padding = '0.5in';
+    element.style.maxWidth = '8.5in';
+    element.style.color = 'black';
+    element.style.backgroundColor = 'white';
+
+    // Optimize headings for ATS parsing
+    const headings = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headings.forEach(heading => {
+      const htmlHeading = heading as HTMLElement;
+      htmlHeading.style.fontWeight = 'bold';
+      htmlHeading.style.marginTop = '12pt';
+      htmlHeading.style.marginBottom = '6pt';
+      htmlHeading.style.color = 'black';
+      htmlHeading.style.backgroundColor = 'transparent';
+      htmlHeading.style.borderBottom = '1pt solid black';
+    });
+
+    // Optimize lists for ATS
+    const lists = element.querySelectorAll('ul, ol');
+    lists.forEach(list => {
+      const htmlList = list as HTMLElement;
+      htmlList.style.marginLeft = '0.25in';
+      htmlList.style.paddingLeft = '0';
+    });
+
+    // Optimize list items
+    const listItems = element.querySelectorAll('li');
+    listItems.forEach(item => {
+      const htmlItem = item as HTMLElement;
+      htmlItem.style.marginBottom = '3pt';
+      htmlItem.style.listStyleType = 'disc';
+      htmlItem.style.listStylePosition = 'outside';
+    });
+
+    // Remove any remaining complex layouts
+    const complexElements = element.querySelectorAll('[class*="grid"], [class*="flex"]');
+    complexElements.forEach(el => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.display = 'block';
+      htmlEl.style.width = '100%';
+    });
   }
 
   /**

@@ -66,22 +66,46 @@
   }
 }
 
-/* Screen styles for better readability */
+/* Screen styles for better readability and performance */
 @media screen {
   .cv-container {
     min-height: 100vh;
     font-family: 'Arial', 'Helvetica', sans-serif;
+    /* Performance optimizations */
+    contain: layout style paint;
+    will-change: scroll-position;
   }
   
-  /* Smooth scrolling */
+  /* Smooth scrolling with performance considerations */
   html {
     scroll-behavior: smooth;
+    /* Performance optimizations */
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   /* Focus styles for accessibility */
   *:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
+  }
+  
+  /* Performance optimizations for animations */
+  * {
+    box-sizing: border-box;
+  }
+  
+  /* Optimize scrolling performance */
+  .cv-container section {
+    contain: layout style;
+  }
+  
+  /* Hardware acceleration for transforms */
+  .download-btn {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
   }
 }
 
@@ -124,10 +148,24 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #2563eb;
 }
 
-/* Responsive images */
+/* Responsive images with performance optimization */
 img {
   max-width: 100%;
   height: auto;
+  /* Performance optimizations */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: transform;
+}
+
+/* Lazy loading optimization */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
 }
 
 /* ATS-friendly table alternative */

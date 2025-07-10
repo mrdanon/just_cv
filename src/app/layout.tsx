@@ -13,18 +13,52 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Piotr Dankowiakowski - Senior 3D Artist & AI Specialist | CV",
-  description: "Professional CV of Piotr Dankowiakowski - Senior 3D Artist, AI Specialist, and Educational Technology Expert based in Warsaw, Poland. 6+ years experience in 3D animation, Blender, AI development, and education.",
-  keywords: "Piotr Dankowiakowski, 3D Artist, AI Specialist, Blender, Educational Technology, Warsaw, Poland, CV, Resume",
+  title: "Piotr Dankowiakowski - Senior 3D Artist & AI Specialist | Professional CV",
+  description: "Professional CV of Piotr Dankowiakowski - Senior 3D Artist & AI Specialist with 6+ years experience in Blender, ConvAI, Machine Learning, and Educational Technology. Download ATS-optimized PDF CV. Based in Warsaw, Poland.",
+  keywords: "Piotr Dankowiakowski, 3D Artist, AI Specialist, Blender, ConvAI, Educational Technology, Machine Learning, Deep Learning, Python, JavaScript, React, TypeScript, Next.js, Architectural Visualization, Animation, Rendering, GPU Acceleration, YouTube Creator, Warsaw Poland, Senior 3D Artist, AI Developer, Game Development, VR, Virtual Reality, Interactive Media, Digital Arts, CV, Resume",
   authors: [{ name: "Piotr Dankowiakowski" }],
   creator: "Piotr Dankowiakowski",
+  publisher: "Piotr Dankowiakowski",
+  category: "technology",
+  classification: "Professional CV",
+  referrer: "origin-when-cross-origin",
   openGraph: {
-    title: "Piotr Dankowiakowski - Senior 3D Artist & AI Specialist",
-    description: "Professional CV showcasing 6+ years of experience in 3D animation, AI development, and educational technology.",
+    title: "Piotr Dankowiakowski - Senior 3D Artist & AI Specialist | Professional CV",
+    description: "Professional CV of Piotr Dankowiakowski - Senior 3D Artist & AI Specialist with 6+ years experience in Blender, ConvAI, Machine Learning, and Educational Technology. Based in Warsaw, Poland.",
     url: "https://www.piotr.danon.site",
-    siteName: "Piotr Dankowiakowski CV",
+    siteName: "Piotr Dankowiakowski Professional CV",
     locale: "en_US",
-    type: "website",
+    type: "profile",
+    images: [
+      {
+        url: "/MyPhoto.jpg",
+        width: 800,
+        height: 600,
+        alt: "Piotr Dankowiakowski - Professional Photo - Senior 3D Artist & AI Specialist",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Piotr Dankowiakowski - Senior 3D Artist & AI Specialist | Professional CV",
+    description: "Professional CV of Piotr Dankowiakowski - Senior 3D Artist & AI Specialist with 6+ years experience in Blender, ConvAI, Machine Learning, and Educational Technology. Based in Warsaw, Poland.",
+    images: ["/MyPhoto.jpg"],
+    creator: "@doctor.blender",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  metadataBase: new URL("https://www.piotr.danon.site"),
+  alternates: {
+    canonical: "https://www.piotr.danon.site",
   },
 };
 
