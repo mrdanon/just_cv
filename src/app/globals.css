@@ -1,26 +1,163 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Print Optimization Styles - ATS Compatible */
+@media print {
+  .cv-container {
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    color: black !important;
+    background: white !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0.5in !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  /* Hide non-essential elements for print */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure proper page breaks */
+  .cv-container section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Typography for print */
+  h1 { font-size: 18pt !important; font-weight: bold !important; }
+  h2 { font-size: 14pt !important; font-weight: bold !important; }
+  h3 { font-size: 12pt !important; font-weight: bold !important; }
+  h4 { font-size: 11pt !important; font-weight: 600 !important; }
+  h5 { font-size: 10pt !important; font-weight: 600 !important; }
+  
+  /* Ensure all text is black for ATS scanners */
+  * {
+    color: black !important;
+    background: transparent !important;
+  }
+  
+  /* List styles for ATS compatibility */
+  ul, ol {
+    margin-left: 0.2in !important;
+  }
+  
+  /* Image optimization for print */
+  img {
+    max-width: 1.5in !important;
+    height: auto !important;
+    border: 1pt solid #ccc !important;
+  }
+  
+  /* Links should show URL in print for ATS */
+  a::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666 !important;
+  }
+  
+  /* Remove link decoration */
+  a {
+    text-decoration: none !important;
+    color: black !important;
   }
 }
 
+/* Screen styles for better readability */
+@media screen {
+  .cv-container {
+    min-height: 100vh;
+    font-family: 'Arial', 'Helvetica', sans-serif;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+/* Base ATS-friendly styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Arial', 'Helvetica', sans-serif !important;
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+/* Typography hierarchy for ATS */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Arial', 'Helvetica', sans-serif !important;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Standard bullet points for ATS */
+.cv-container ul {
+  list-style-type: disc;
+}
+
+.cv-container ol {
+  list-style-type: decimal;
+}
+
+/* Button styles for PDF download */
+.download-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ATS-friendly table alternative */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error states */
+.error {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+}
+
+/* Success states */
+.success {
+  color: #059669;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
 }
