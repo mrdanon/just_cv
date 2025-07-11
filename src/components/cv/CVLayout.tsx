@@ -119,7 +119,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Work Experience
         </h2>
         <div className="space-y-6">
-          {data.workExperience.map((job, index) => (
+          {data.workExperience.map((job) => (
             <div key={job.id} className="bg-gradient-to-r from-green-50 to-teal-50 rounded-lg p-6 border-l-4 border-green-500 shadow-sm">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -172,7 +172,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Technical Skills
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {data.skills.map((category, index) => (
+          {data.skills.map((category) => (
             <div key={category.id} className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border-l-4 border-purple-500">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <span className="w-6 h-6 bg-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -207,7 +207,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Key Projects
         </h2>
         <div className="space-y-6">
-          {data.projects.map((project, index) => (
+          {data.projects.map((project) => (
             <div key={project.id} className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 border-l-4 border-orange-500 shadow-sm">
               <div className="flex items-start justify-between mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -251,7 +251,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Education
         </h2>
         <div className="space-y-4">
-          {data.education.map((edu, index) => (
+          {data.education.map((edu) => (
             <div key={edu.id} className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-6 border-l-4 border-indigo-500">
               <div className="flex items-start justify-between mb-2">
                 <div>
@@ -281,7 +281,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Courses & Certifications
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {data.courses.map((course, index) => (
+          {data.courses.map((course) => (
             <div key={course.id} className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 border-l-4 border-teal-500">
               <h3 className="text-lg font-semibold text-gray-900">{course.name}</h3>
               <h4 className="text-md font-medium text-gray-700">{course.provider}</h4>
@@ -303,7 +303,7 @@ export default function CVLayout({ data }: CVLayoutProps) {
           Languages
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {data.languages.map((language, index) => (
+          {data.languages.map((language) => (
             <div key={language.id} className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg p-4 border-l-4 border-pink-500">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-gray-900">{language.name}</span>
