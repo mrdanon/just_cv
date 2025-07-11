@@ -10,6 +10,73 @@ export class PDFGenerator {
   };
 
   /**
+   * Convert image to base64 for PDF embedding
+   */
+  private static async convertImageToBase64(imgElement: HTMLImageElement): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        reject(new Error('Canvas context not available'));
+        return;
+      }
+
+      canvas.width = imgElement.naturalWidth || imgElement.width;
+      canvas.height = imgElement.naturalHeight || imgElement.height;
+
+      // Handle CORS and create a new image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png', 1.0));
+      };
+      
+      img.onerror = () => {
+        // Fallback: try to get the image from the current element
+        try {
+          ctx.drawImage(imgElement, 0, 0);
+          resolve(canvas.toDataURL('image/png', 1.0));
+        } catch (e) {
+          console.warn('Could not convert image to base64:', e);
+          resolve(''); // Return empty string if conversion fails
+        }
+      };
+
+      // Try to load the image
+      if (imgElement.src.startsWith('data:')) {
+        img.src = imgElement.src;
+      } else if (imgElement.src.startsWith('/_next/')) {
+        // Handle Next.js optimized images
+        img.src = imgElement.src;
+      } else {
+        img.src = imgElement.src;
+      }
+    });
+  }
+
+  /**
+   * Prepare element for PDF generation by converting images to base64
+   */
+  private static async prepareElementForPDF(element: HTMLElement): Promise<void> {
+    const images = element.querySelectorAll('img');
+    const promises = Array.from(images).map(async (img) => {
+      try {
+        const base64 = await this.convertImageToBase64(img);
+        if (base64) {
+          img.src = base64;
+        }
+      } catch (error) {
+        console.warn('Failed to convert image to base64:', error);
+      }
+    });
+    
+    await Promise.all(promises);
+  }
+
+  /**
    * Generate PDF from HTML element using html2canvas and jsPDF
    */
   static async generateFromElement(
@@ -27,43 +94,57 @@ export class PDFGenerator {
       // Show loading state
       this.showLoadingState(true);
 
-      // Configure html2canvas for high quality
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher resolution
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        scrollX: 0,
-        scrollY: 0
-      });
+      // Clone element to avoid modifying the original
+      const clone = element.cloneNode(true) as HTMLElement;
+      clone.id = elementId + '-pdf-temp';
+      
+      // Apply PDF-specific styles
+      this.applyPDFStyles(clone);
+      
+      // Temporarily add to DOM
+      document.body.appendChild(clone);
+      
+      try {
+        // Prepare images for PDF
+        await this.prepareElementForPDF(clone);
+        
+        // Wait a bit for images to load
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Calculate dimensions for A4
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm  
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+        // Configure html2canvas for high quality
+        const canvas = await html2canvas(clone, {
+          scale: 2, // Higher resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: clone.scrollWidth,
+          height: clone.scrollHeight,
+          scrollX: 0,
+          scrollY: 0,
+          onclone: (clonedDoc) => {
+            // Ensure all images are loaded in the cloned document
+            const clonedImages = clonedDoc.querySelectorAll('img');
+            clonedImages.forEach(img => {
+              if (img.src.startsWith('/_next/')) {
+                // Handle Next.js images
+                img.style.display = 'block';
+              }
+            });
+          }
+        });
 
-      // Create PDF
-      const pdf = new jsPDF('portrait', 'mm', 'a4');
-      let position = 0;
+        // Calculate dimensions for A4
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 295; // A4 height in mm  
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
 
-      // Add pages as needed
-      pdf.addImage(
-        canvas.toDataURL('image/png', config.quality), 
-        'PNG', 
-        0, 
-        position, 
-        imgWidth, 
-        imgHeight
-      );
-      heightLeft -= pageHeight;
+        // Create PDF
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        let position = 0;
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
+        // Add pages as needed
         pdf.addImage(
           canvas.toDataURL('image/png', config.quality), 
           'PNG', 
@@ -73,12 +154,30 @@ export class PDFGenerator {
           imgHeight
         );
         heightLeft -= pageHeight;
-      }
 
-      // Save the PDF
-      pdf.save(config.filename);
-      
-      this.showSuccessMessage('PDF downloaded successfully!');
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(
+            canvas.toDataURL('image/png', config.quality), 
+            'PNG', 
+            0, 
+            position, 
+            imgWidth, 
+            imgHeight
+          );
+          heightLeft -= pageHeight;
+        }
+
+        // Save the PDF
+        pdf.save(config.filename);
+        
+        this.showSuccessMessage('PDF downloaded successfully!');
+        
+      } finally {
+        // Clean up cloned element
+        document.body.removeChild(clone);
+      }
       
     } catch (error) {
       console.error('PDF generation failed:', error);
@@ -86,6 +185,53 @@ export class PDFGenerator {
     } finally {
       this.showLoadingState(false);
     }
+  }
+
+  /**
+   * Apply PDF-specific styles to element
+   */
+  private static applyPDFStyles(element: HTMLElement): void {
+    // Add PDF-specific styles
+    element.style.fontFamily = 'Arial, Helvetica, sans-serif';
+    element.style.fontSize = '12px';
+    element.style.lineHeight = '1.4';
+    element.style.color = '#000000';
+    element.style.backgroundColor = '#ffffff';
+    element.style.width = '210mm';
+    element.style.maxWidth = '210mm';
+    element.style.padding = '15mm';
+    element.style.margin = '0';
+    element.style.boxShadow = 'none';
+    element.style.borderRadius = '0';
+    
+    // Handle gradients for PDF - convert to solid colors
+    const gradientElements = element.querySelectorAll('[class*="gradient"]');
+    gradientElements.forEach(el => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.classList.contains('bg-gradient-to-r')) {
+        // Convert gradients to solid colors for PDF
+        htmlEl.style.background = '#f8fafc'; // Light gray background
+        htmlEl.style.backgroundImage = 'none';
+      }
+    });
+    
+    // Ensure images are sized properly for PDF
+    const images = element.querySelectorAll('img');
+    images.forEach(img => {
+      const imgEl = img as HTMLImageElement;
+      imgEl.style.maxWidth = '100%';
+      imgEl.style.height = 'auto';
+      imgEl.style.display = 'block';
+    });
+    
+    // Handle circular images
+    const photoContainers = element.querySelectorAll('.photo-container');
+    photoContainers.forEach(container => {
+      const htmlContainer = container as HTMLElement;
+      htmlContainer.style.borderRadius = '50%';
+      htmlContainer.style.overflow = 'hidden';
+      htmlContainer.style.border = '2px solid #e5e7eb';
+    });
   }
 
   /**
@@ -105,8 +251,55 @@ export class PDFGenerator {
           width: 100% !important;
           margin: 0 !important;
           padding: 0.5in !important;
+          background: white !important;
+          box-shadow: none !important;
         }
         .no-print { display: none !important; }
+        
+        /* Convert gradients to solid colors for print */
+        .bg-gradient-to-r {
+          background: #f8fafc !important;
+          background-image: none !important;
+        }
+        
+        /* Ensure proper photo display */
+        .photo-container {
+          width: 100px !important;
+          height: 100px !important;
+          border-radius: 50% !important;
+          overflow: hidden !important;
+          border: 2px solid #e5e7eb !important;
+        }
+        
+        .photo-container img {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+        }
+        
+        /* Simplify layout for print */
+        .grid {
+          display: block !important;
+        }
+        
+        .grid > div {
+          margin-bottom: 0.5rem !important;
+        }
+        
+        /* Ensure text is readable */
+        * {
+          color: black !important;
+          font-family: Arial, sans-serif !important;
+        }
+        
+        /* Remove shadows and modern effects */
+        .shadow-lg, .shadow-sm {
+          box-shadow: none !important;
+        }
+        
+        .backdrop-blur-sm {
+          backdrop-filter: none !important;
+        }
       }
     `;
     document.head.appendChild(printStyles);
@@ -200,117 +393,89 @@ export class PDFGenerator {
         summary.innerHTML = `${currentText} Seeking ${jobTitle} opportunities to leverage expertise in 3D animation, AI development, and educational technology.`;
       }
     }
-
-    // Add metadata for ATS parsing
-    const metaData = document.createElement('div');
-    metaData.style.display = 'none';
-    metaData.innerHTML = `
-      <!-- ATS Metadata -->
-      <span>Target Position: ${jobTitle}</span>
-      <span>Keywords: 3D Artist, AI Specialist, Blender, Educational Technology, Machine Learning</span>
-      <span>Location: Warsaw, Poland</span>
-      <span>Experience: 6+ years</span>
-    `;
-    element.appendChild(metaData);
   }
 
   /**
-   * Apply ATS-specific optimizations to element
+   * Optimize element for ATS systems
    */
   private static optimizeForATS(element: HTMLElement): void {
-    // Remove all images except the profile photo for maximum ATS compatibility
-    const images = element.querySelectorAll('img');
-    images.forEach((img, index) => {
-      if (index > 0) { // Keep only the first image (profile photo)
-        img.remove();
-      } else {
-        // Optimize the profile photo for ATS
-        img.style.width = '100px';
-        img.style.height = '100px';
-        img.style.border = '1px solid black';
-        img.style.borderRadius = '0';
-      }
-    });
-
-    // Enhanced ATS color optimization
+    // Remove all background colors and gradients
+    element.style.background = 'white';
+    element.style.backgroundImage = 'none';
+    
+    // Simplify all child elements
     const allElements = element.querySelectorAll('*');
     allElements.forEach(el => {
       const htmlEl = el as HTMLElement;
-      htmlEl.style.color = 'black';
-      htmlEl.style.backgroundColor = 'white';
-      htmlEl.style.borderColor = 'black';
-      htmlEl.style.textDecoration = 'none';
-      
-      // Remove gradients and complex styling
-      htmlEl.style.background = 'transparent';
+      htmlEl.style.background = 'white';
+      htmlEl.style.backgroundImage = 'none';
       htmlEl.style.boxShadow = 'none';
       htmlEl.style.borderRadius = '0';
+      htmlEl.style.color = 'black';
+      htmlEl.style.fontFamily = 'Arial, sans-serif';
     });
-
-    // ATS-optimized typography
-    element.style.fontFamily = 'Arial, Helvetica, sans-serif';
-    element.style.fontSize = '11pt';
-    element.style.lineHeight = '1.4';
-    element.style.margin = '0';
-    element.style.padding = '0.5in';
-    element.style.maxWidth = '8.5in';
-    element.style.color = 'black';
-    element.style.backgroundColor = 'white';
-
-    // Optimize headings for ATS parsing
-    const headings = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    headings.forEach(heading => {
-      const htmlHeading = heading as HTMLElement;
-      htmlHeading.style.fontWeight = 'bold';
-      htmlHeading.style.marginTop = '12pt';
-      htmlHeading.style.marginBottom = '6pt';
-      htmlHeading.style.color = 'black';
-      htmlHeading.style.backgroundColor = 'transparent';
-      htmlHeading.style.borderBottom = '1pt solid black';
+    
+    // Convert grid layouts to simple blocks
+    const gridElements = element.querySelectorAll('.grid');
+    gridElements.forEach(grid => {
+      const htmlGrid = grid as HTMLElement;
+      htmlGrid.style.display = 'block';
+      htmlGrid.style.gridTemplateColumns = 'none';
+      htmlGrid.style.gap = '0';
     });
-
-    // Optimize lists for ATS
-    const lists = element.querySelectorAll('ul, ol');
-    lists.forEach(list => {
-      const htmlList = list as HTMLElement;
-      htmlList.style.marginLeft = '0.25in';
-      htmlList.style.paddingLeft = '0';
+    
+    // Ensure proper spacing
+    const sections = element.querySelectorAll('section');
+    sections.forEach(section => {
+      const htmlSection = section as HTMLElement;
+      htmlSection.style.marginBottom = '20px';
+      htmlSection.style.pageBreakInside = 'avoid';
     });
-
-    // Optimize list items
-    const listItems = element.querySelectorAll('li');
-    listItems.forEach(item => {
-      const htmlItem = item as HTMLElement;
-      htmlItem.style.marginBottom = '3pt';
-      htmlItem.style.listStyleType = 'disc';
-      htmlItem.style.listStylePosition = 'outside';
+    
+    // Simplify headers
+    const headers = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    headers.forEach(header => {
+      const htmlHeader = header as HTMLElement;
+      htmlHeader.style.color = 'black';
+      htmlHeader.style.fontWeight = 'bold';
+      htmlHeader.style.marginBottom = '10px';
+      htmlHeader.style.marginTop = '15px';
     });
-
-    // Remove any remaining complex layouts
-    const complexElements = element.querySelectorAll('[class*="grid"], [class*="flex"]');
-    complexElements.forEach(el => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.style.display = 'block';
-      htmlEl.style.width = '100%';
-    });
+    
+    // Ensure photo is ATS-friendly
+    const photoContainer = element.querySelector('.photo-container');
+    if (photoContainer) {
+      const htmlContainer = photoContainer as HTMLElement;
+      htmlContainer.style.width = '100px';
+      htmlContainer.style.height = '100px';
+      htmlContainer.style.borderRadius = '0';
+      htmlContainer.style.border = '1px solid black';
+      htmlContainer.style.float = 'right';
+      htmlContainer.style.marginLeft = '10px';
+      htmlContainer.style.marginBottom = '10px';
+    }
   }
 
   /**
    * Show loading state
    */
   private static showLoadingState(show: boolean): void {
-    const button = document.querySelector('.download-btn') as HTMLButtonElement;
-    if (button) {
+    const buttons = document.querySelectorAll('.download-btn');
+    buttons.forEach(button => {
+      const btn = button as HTMLButtonElement;
       if (show) {
-        button.textContent = 'Generating PDF...';
-        button.disabled = true;
-        button.classList.add('loading');
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.textContent = 'Generating...';
       } else {
-        button.textContent = 'Download PDF';
-        button.disabled = false;
-        button.classList.remove('loading');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        // Reset button text (you might want to store original text)
+        if (btn.textContent === 'Generating...') {
+          btn.textContent = 'Download PDF';
+        }
       }
-    }
+    });
   }
 
   /**
@@ -332,7 +497,7 @@ export class PDFGenerator {
    */
   private static showToast(message: string, type: 'success' | 'error'): void {
     const toast = document.createElement('div');
-    toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white z-50 ${
+    toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white font-medium z-50 ${
       type === 'success' ? 'bg-green-500' : 'bg-red-500'
     }`;
     toast.textContent = message;
