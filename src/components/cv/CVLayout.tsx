@@ -24,6 +24,16 @@ export default function CVLayout({ data }: CVLayoutProps) {
             height={150}
             className="rounded-lg object-cover border-2 border-gray-200 mx-auto"
             priority
+            quality={95}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            onError={(e) => {
+              console.error('Image failed to load:', e);
+              // Fallback to a default image or hide the image
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+            unoptimized={false}
           />
         </div>
         
