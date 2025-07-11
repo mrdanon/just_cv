@@ -12,19 +12,61 @@
 
 /* Download Button Styles */
 .download-btn {
-  @apply bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  transform: scale(1);
   min-width: 140px;
   text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.05);
 }
 
 .download-btn:disabled {
-  @apply opacity-50 cursor-not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
   transform: none;
 }
 
 .download-btn:disabled:hover {
-  @apply bg-blue-600;
+  background-color: #2563eb;
   transform: none;
+}
+
+/* Green Button Variant */
+.download-btn.bg-green-600 {
+  background-color: #16a34a;
+}
+
+.download-btn.bg-green-600:hover {
+  background-color: #15803d;
+}
+
+/* Purple Button Variant */
+.download-btn.bg-purple-600 {
+  background-color: #9333ea;
+}
+
+.download-btn.bg-purple-600:hover {
+  background-color: #7c3aed;
+}
+
+/* Orange Button Variant */
+.download-btn.bg-orange-600 {
+  background-color: #ea580c;
+}
+
+.download-btn.bg-orange-600:hover {
+  background-color: #c2410c;
 }
 
 /* Modern Gradient Backgrounds */
@@ -74,45 +116,96 @@
 
 /* Modern Card Styles */
 .modern-card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-100 p-6 transition-all duration-200 hover:shadow-md;
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modern-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .modern-card-gradient {
-  @apply rounded-lg shadow-sm p-6 transition-all duration-200 hover:shadow-md;
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modern-card-gradient:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Section Headers */
 .section-header {
-  @apply text-2xl font-bold mb-6 text-gray-900 flex items-center gap-2;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .section-icon {
-  @apply w-8 h-8 rounded-full flex items-center justify-center text-white font-bold;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
 
 /* Skill Pills */
 .skill-pill {
-  @apply px-3 py-1 rounded-full text-sm font-medium;
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
 }
 
 /* Technology Tags */
 .tech-tag {
-  @apply px-2 py-1 rounded-full text-sm font-medium;
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
 }
 
 /* Status Badges */
 .status-badge {
-  @apply px-3 py-1 rounded-full text-sm font-medium;
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: inline-block;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .cv-container {
-    @apply p-4;
+    padding: 1rem;
   }
   
   .download-btn {
-    @apply py-2 px-3 text-sm;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
     min-width: 120px;
   }
   
@@ -122,12 +215,12 @@
   }
   
   .section-header {
-    @apply text-xl;
+    font-size: 1.25rem;
   }
   
   .modern-card,
   .modern-card-gradient {
-    @apply p-4;
+    padding: 1rem;
   }
 }
 
@@ -229,7 +322,7 @@
   }
   
   .grid > div {
-    margin-bottom: 5pt !important;
+    margin-bottom: 0.5rem !important;
     break-inside: avoid !important;
   }
   
